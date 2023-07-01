@@ -1,5 +1,5 @@
-import { BusinessException } from '../exception/bussiness.exception';
-import { ClientePosta } from './cliente';
+import { BusinessException } from '../../src/exception/bussiness.exception';
+import { ClientePosta } from '../../src/domain/cliente';
 
 describe('Dado un cliente que tiene tanto safe shop como promoción como condiciones comerciales', () => {
   const montoMaximoSafeShopCliente = 80;

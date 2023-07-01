@@ -1,4 +1,4 @@
-import { ClientePosta } from './cliente';
+import { ClientePosta } from '../../src/domain/cliente';
 
 describe('Dado un cliente que tiene únicamente promoción como condición comercial', () => {
   let cliente!: ClientePosta;

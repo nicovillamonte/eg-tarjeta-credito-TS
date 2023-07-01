@@ -1,4 +1,4 @@
-import { ClientePosta } from './cliente';
+import { ClientePosta } from '../../src/domain/cliente';
 
 describe('Dado un cliente que tiene únicamente safe shop como condición comercial', () => {
   const montoMaximoSafeShopCliente = 30;
