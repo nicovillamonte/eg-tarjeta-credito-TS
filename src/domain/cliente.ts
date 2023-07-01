@@ -1,8 +1,14 @@
 import { BusinessException } from '../exception/bussiness.exception';
 
 export interface Cliente {
+  saldo: number;
+  puntosPromocion: number;
+
   comprar(monto: number): void;
   pagarVencimiento(monto: number): void;
+
+  // En TypeScript, las interfaces no pueden tener definiciones. Solamente las clases abstractas.
+  esMoroso(): boolean;
 }
 
 export class ClientePosta implements Cliente {

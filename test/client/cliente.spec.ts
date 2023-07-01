@@ -1,10 +1,11 @@
-import { ClientePosta } from '../../src/domain/cliente';
+import { ClienteBuilder } from '../../src/builder/cliente.builder';
+import { Cliente, ClientePosta } from '../../src/domain/cliente';
 
 describe('Dado un cliente sin condiciones comerciales', () => {
-  let cliente!: ClientePosta;
+  let cliente!: Cliente;
 
   beforeEach(() => {
-    cliente = new ClientePosta(50);
+    cliente = new ClienteBuilder(new ClientePosta(50)).build();
   });
 
   it('al pagar el vencimiento deja de ser moroso', () => {

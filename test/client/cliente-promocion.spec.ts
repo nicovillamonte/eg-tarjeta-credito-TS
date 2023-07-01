@@ -1,11 +1,11 @@
-import { ClientePosta } from '../../src/domain/cliente';
+import { ClienteBuilder } from '../../src/builder/cliente.builder';
+import { Cliente, ClientePosta } from '../../src/domain/cliente';
 
 describe('Dado un cliente que tiene únicamente promoción como condición comercial', () => {
-  let cliente!: ClientePosta;
+  let cliente!: Cliente;
 
   beforeEach(() => {
-    cliente = new ClientePosta(40);
-    cliente.adheridoPromocion = true;
+    cliente = new ClienteBuilder(new ClientePosta(40)).promocion().build();
   });
 
   it('al comprar por debajo del límite necesario para acumular puntos, no acumula puntos de promoción', () => {

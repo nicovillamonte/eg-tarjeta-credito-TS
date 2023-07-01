@@ -1,13 +1,14 @@
-import { ClientePosta } from '../../src/domain/cliente';
+import { ClienteBuilder } from '../../src/builder/cliente.builder';
+import { Cliente, ClientePosta } from '../../src/domain/cliente';
 
 describe('Dado un cliente que tiene únicamente safe shop como condición comercial', () => {
   const montoMaximoSafeShopCliente = 30;
-  let cliente!: ClientePosta;
+  let cliente!: Cliente;
 
   beforeEach(() => {
-    cliente = new ClientePosta(50);
-    cliente.adheridoSafeShop = true;
-    cliente.montoMaximoSafeShop = montoMaximoSafeShopCliente;
+    cliente = new ClienteBuilder(new ClientePosta(50))
+      .safeShop(montoMaximoSafeShopCliente)
+      .build();
   });
 
   it('no debe poder comprar por más del valor permitido ni debe aumentar el saldo', () => {
