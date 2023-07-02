@@ -15,11 +15,11 @@ describe('Dado un cliente que tiene únicamente safe shop como condición comerc
     expect(() => cliente.comprar(montoMaximoSafeShopCliente + 1)).toThrow(
       'Debe comprar por menos de 30',
     );
-    expect(cliente.saldo).toBe(50);
+    expect(cliente.saldo()).toBe(50);
   });
 
   it('debe poder comprar hasta el valor límite', () => {
     cliente.comprar(montoMaximoSafeShopCliente);
-    expect(cliente.saldo).toBe(50 + montoMaximoSafeShopCliente);
+    expect(cliente.saldo()).toBe(50 + montoMaximoSafeShopCliente);
   });
 });

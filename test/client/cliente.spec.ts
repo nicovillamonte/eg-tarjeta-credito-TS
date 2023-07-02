@@ -16,6 +16,6 @@ describe('Dado un cliente sin condiciones comerciales', () => {
 
   it('al comprar sube el saldo', () => {
     cliente.comprar(50);
-    expect(cliente.saldo).toBe(100);
+    expect(cliente.saldo()).toBe(100);
   });
 });

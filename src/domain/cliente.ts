@@ -1,45 +1,49 @@
-import { BusinessException } from '../exception/bussiness.exception';
+import { CondicionComercial } from './condicion-comercial';
 
 export interface Cliente {
-  saldo: number;
-  puntosPromocion: number;
-
+  saldo(): number;
+  puntosPromocion(): number;
   comprar(monto: number): void;
   pagarVencimiento(monto: number): void;
-
-  // En TypeScript, las interfaces no pueden tener definiciones. Solamente las clases abstractas.
+  sumarPuntos(puntos: number): void;
   esMoroso(): boolean;
 }
 
 export class ClientePosta implements Cliente {
-  montoMaximoSafeShop = 50;
-  puntosPromocion = 0;
-  adheridoPromocion = false;
-  adheridoSafeShop = false;
+  private _puntosPromocion = 0;
+  condicionesComerciales: Array<CondicionComercial> = [];
 
   static montoMinimoPromocion = 50;
   static PUNTAJE_PROMOCION = 15;
 
-  constructor(public saldo: number = 0) {}
+  constructor(private _saldo: number = 0) {}
 
   comprar(monto: number): void {
-    if (this.adheridoSafeShop && monto > this.montoMaximoSafeShop) {
-      throw new BusinessException(
-        `Debe comprar por menos de ${this.montoMaximoSafeShop}`,
-      );
-    }
-
-    this.saldo = this.saldo + monto;
-
-    if (this.adheridoPromocion && monto > ClientePosta.montoMinimoPromocion) {
-      this.puntosPromocion =
-        this.puntosPromocion + ClientePosta.PUNTAJE_PROMOCION;
-    }
+    this.condicionesComerciales
+      .sort((a, b) => a.order() - b.order())
+      .forEach((condicionComercial) => condicionComercial.comprar(monto, this));
+    this._saldo = this._saldo + monto;
   }
 
   pagarVencimiento(monto: number): void {
-    this.saldo = this.saldo - monto;
+    this._saldo = this._saldo - monto;
   }
 
-  esMoroso = () => this.saldo > 0;
+  sumarPuntos = (puntos: number) => {
+    this._puntosPromocion = this._puntosPromocion + puntos;
+  };
+
+  esMoroso = () => this._saldo > 0;
+
+  agregarCondicionComercial = (condicionComercial: CondicionComercial) => {
+    this.condicionesComerciales.push(condicionComercial);
+  };
+
+  puntosPromocion(): number {
+    return this._puntosPromocion;
+  }
+
+  saldo(): number {
+    return this._saldo;
+  }
 }
