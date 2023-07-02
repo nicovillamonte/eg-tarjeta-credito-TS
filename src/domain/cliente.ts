@@ -53,15 +53,9 @@ export abstract class ClienteConCondicionComercial implements Cliente {
     this.cliente.sumarPuntos(puntos);
   }
 
-  esMoroso = (): boolean => {
-    return this.cliente.esMoroso();
-  };
+  esMoroso = (): boolean => this.cliente.esMoroso();
 
-  saldo = () => {
-    return this.cliente.saldo();
-  };
+  saldo = () => this.cliente.saldo();
 
-  puntosPromocion = () => {
-    return this.cliente.puntosPromocion();
-  };
+  puntosPromocion = () => this.cliente.puntosPromocion();
 }
