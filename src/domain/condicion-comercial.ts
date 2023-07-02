@@ -1,5 +1,6 @@
+import { inherits } from 'util';
 import { BusinessException } from '../exception/bussiness.exception';
-import { Cliente } from './cliente';
+import { Cliente, ClienteConCondicionComercial } from './cliente';
 
 export interface CondicionComercial {
   comprar(monto: number, cliente: Cliente): void;
@@ -9,16 +10,18 @@ export interface CondicionComercial {
 /*------------------------
   Safeshop
 ------------------------*/
-export class SafeShop implements CondicionComercial {
-  constructor(private montoMaximo: number) {}
+export class SafeShop extends ClienteConCondicionComercial {
+  constructor(private montoMaximo: number, cliente: Cliente) {
+    super(cliente);
+  }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  comprar(monto: number, cliente: Cliente): void {
+  override comprar(monto: number): void {
     if (monto > this.montoMaximo) {
       throw new BusinessException(
         `Debe comprar por menos de ${this.montoMaximo}`,
       );
     }
+    super.comprar(monto);
   }
 
   order = () => 1;
@@ -27,13 +30,18 @@ export class SafeShop implements CondicionComercial {
 /*------------------------
   Promocion
 ------------------------*/
-export class Promocion implements CondicionComercial {
+export class Promocion extends ClienteConCondicionComercial {
+  constructor(cliente: Cliente) {
+    super(cliente);
+  }
+
   static montoMinimoPromocion = 50;
   static PUNTAJE_PROMOCION = 15;
 
-  comprar(monto: number, cliente: Cliente): void {
+  override comprar(monto: number): void {
+    super.comprar(monto);
     if (monto > Promocion.montoMinimoPromocion) {
-      cliente.sumarPuntos(Promocion.PUNTAJE_PROMOCION);
+      super.sumarPuntos(Promocion.PUNTAJE_PROMOCION);
     }
   }
 

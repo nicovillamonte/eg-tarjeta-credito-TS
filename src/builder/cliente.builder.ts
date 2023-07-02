@@ -1,21 +1,21 @@
 import { BusinessException } from '../exception/bussiness.exception';
-import { ClientePosta } from '../domain/cliente';
+import { Cliente, ClientePosta } from '../domain/cliente';
 import { Promocion, SafeShop } from '../domain/condicion-comercial';
 
 export class ClienteBuilder {
-  constructor(private cliente: ClientePosta) {}
+  constructor(private cliente: Cliente) {}
 
   safeShop(montoMaximo: number): ClienteBuilder {
-    this.cliente.agregarCondicionComercial(new SafeShop(montoMaximo));
+    this.cliente = new SafeShop(montoMaximo, this.cliente);
     return this;
   }
 
   promocion(): ClienteBuilder {
-    this.cliente.agregarCondicionComercial(new Promocion());
+    this.cliente = new Promocion(this.cliente);
     return this;
   }
 
-  build(): ClientePosta {
+  build(): Cliente {
     if (this.cliente.saldo() <= 0) {
       throw new BusinessException('El saldo debe ser positivo');
     }
