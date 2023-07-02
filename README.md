@@ -3,76 +3,110 @@
 Esta es una implementación del ejemplo de Tarjeta de Crédito implementado en NestJS con TypeScript.<br>
 Solamente es una traducción de lenguaje del [ejemplo de Tarjeta de Crédito del docente Fernando Dodino](https://github.com/uqbar-project/eg-tarjeta-credito-kotlin/tree/01-builder) desarrollado en kotlin.<br><br>
 
-La rama main contiene la implementación de la solución utilizando if.
+La rama actual contiene la implementación de la solución con strategy.
 
 ## Dominio
 
 El dominio esta explicado en [este apunte](https://docs.google.com/document/d/1Ijz8Pe-ci6bYwbxIn-VZDV1QcijDy2JuAUQtohNX0oA/edit#heading=h.30j0zll).
 
-## Definiendo una interfaz más rica
-Queremos que la interfaz de Cliente
-- tenga una definición de moroso (No posible en interfaces de TypeScript)
-- y defina propiedades saldo y puntosPromocion
-
-A diferencia de Kotlin, en TypeScript no podemos definir las funciones de una interfaz, solamente declararlas. Por lo tanto no se puede definir el código default de esMoroso() en la interfaz, sino que se debe definir en la clase que implementa la interfaz. Esto es una limitación de TypeScript frente a Kotlin.
+## Variante con strategies
+Cada condición comercial se representa como una estrategia dentro de la compra. Agregamos entonces una colección de condiciones comerciales en el cliente:
 
 ``` typescript
-export interface Cliente {
-  saldo: number;
-  puntosPromocion: number;
+export class ClientePosta implements Cliente {
+  private _puntosPromocion = 0;
+  condicionesComerciales: Array<CondicionComercial> = [];
+```
+Como ventaja, desaparecen atributos para manejar el monto máximo de safe shop y los flags por cada condición comercial.
 
-  comprar(monto: number): void;
-  pagarVencimiento(monto: number): void;
+### Implementación de las condiciones comerciales
+Tanto SafeShop como Promocion son clases que implementan la interfaz CondicionComercial:
 
-  esMoroso(): boolean; // No se puede definir
+``` typescript
+export interface CondicionComercial {
+  comprar(monto: number, cliente: Cliente): void;
+  order(): number;
+}
+
+/*------------------------
+  Safeshop
+------------------------*/
+export class SafeShop implements CondicionComercial {
+  constructor(private montoMaximo: number) {}
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  comprar(monto: number, cliente: Cliente): void {
+    if (monto > this.montoMaximo) {
+      throw new BusinessException(
+        `Debe comprar por menos de ${this.montoMaximo}`,
+      );
+    }
+  }
+
+  order = () => 1;
+}
+
+/*------------------------
+  Promocion
+------------------------*/
+export class Promocion implements CondicionComercial {
+  static montoMinimoPromocion = 50;
+  static PUNTAJE_PROMOCION = 15;
+
+  comprar(monto: number, cliente: Cliente): void {
+    if (monto > Promocion.montoMinimoPromocion) {
+      cliente.sumarPuntos(Promocion.PUNTAJE_PROMOCION);
+    }
+  }
+
+  order = () => 2;
 }
 ```
 
-## Creando clientes con un builder
+Algunos comentarios:
 
-Otra idea que permite simplificar la instanciación de un cliente es la utilización de un builder u objeto que sabe construir un cliente. Por el momento pareciera un caso de sobrediseño, pero a priori nos permite ahorrar la sincronización de los booleanos `adheridoSafeShop` y `adheridoPromocion`.
+* decidimos dejar los puntos de promoción dentro del cliente, para simplificar su uso (podés pensar qué pasaría si el test tuviera que conocer los puntos a través de la promoción directamente, cómo podría llegar a esa referencia sin pasar por el cliente)
+* como consecuencia de esta última decisión, tuvimos que agregar un mensaje más en la interfaz Cliente:
+``` typescript
+export interface Cliente {
+  ...
+  sumarPuntos(puntos: number): void;
+}
+```
+* también necesitamos establecer un orden para las condiciones comerciales, ya que no es lo mismo que primero esté la promoción y luego la compra segura que al revés. En el primer caso podría pasar que primero se sume puntos a una compra que en realidad no debería estar permitida.
 
-El builder tiene como característica
-- recibir un cliente
-- tener métodos que permiten agregar condiciones comerciales, y en cada uno de ellos se devuelve el propio builder. Eso permite encadenar los mensajes en los tests
-- por último, en el método `build()` se pueden hacer validaciones asegurando la consistencia del objeto creado
+### Cómo queda el método comprar
+El método comprar debe incorporar la llamada a las condiciones comerciales antes de sumar el saldo:
+``` typescript
+comprar(monto: number): void {
+  this.condicionesComerciales
+    .sort((a, b) => a.order() - b.order())
+    .forEach((condicionComercial) => condicionComercial.comprar(monto, this));
+  this._saldo = this._saldo + monto;
+}
+```
+Además como dijimos antes, hay que ordenar las condiciones comerciales para asegurarnos de que la compra segura tenga prioridad sobre las otras condiciones.
 
-Vemos el código
+### Cambios al builder
+El builder solo debe modificar la forma en la que se generan las condiciones comerciales:
 
 ``` typescript
 export class ClienteBuilder {
   constructor(private cliente: ClientePosta) {}
 
   safeShop(montoMaximo: number): ClienteBuilder {
-    this.cliente.adheridoSafeShop = true;
-    this.cliente.montoMaximoSafeShop = montoMaximo;
+    this.cliente.agregarCondicionComercial(new SafeShop(montoMaximo));
     return this;
   }
 
   promocion(): ClienteBuilder {
-    this.cliente.adheridoPromocion = true;
+    this.cliente.agregarCondicionComercial(new Promocion());
     return this;
   }
-
-  build(): ClientePosta {
-    if (this.cliente.saldo <= 0) {
-      throw new BusinessException('El saldo debe ser positivo');
-    }
-    return this.cliente;
-  }
-}
 ```
+### Los tests quedan igual
 
-Por otra parte el uso en el test que trabaja con un cliente con las dos condiciones comerciales es:
-
-``` typescript
-cliente = new ClienteBuilder(new ClientePosta(50))
-            .promocion()
-            .safeShop(montoMaximoSafeShopCliente)
-            .build()
-```
-
-Más adelante esta definición nos será muy útil.
+Gracias al diseño del ClienteBuilder, no debemos hacer ningún cambio en los tests y éstos pasan satisfactoriamente.
 
 ## Ejecución
 La ejecucion de este proyecto es meramente con propósito educativo. Por lo tanto la ejecución con el comando `npm start` solo comenzaría la ejecución de un programa que no tiene funcionalidad.<br><br>
