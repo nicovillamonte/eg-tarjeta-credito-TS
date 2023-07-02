@@ -3,7 +3,7 @@
 Esta es una implementación del ejemplo de Tarjeta de Crédito implementado en NestJS con TypeScript.<br>
 Solamente es una traducción de lenguaje del [ejemplo de Tarjeta de Crédito del docente Fernando Dodino](https://github.com/uqbar-project/eg-tarjeta-credito-kotlin/tree/01-builder) desarrollado en kotlin.<br><br>
 
-La rama main contiene la implementación de la solución utilizando if.
+La rama actual contiene la implementación del Builder de clientes.
 
 ## Dominio
 
