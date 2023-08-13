@@ -12,5 +12,5 @@ Siguiendo [este apunte](https://docs.google.com/document/d/1Ijz8Pe-ci6bYwbxIn-VZ
 La ejecucion de este proyecto es meramente con propósito educativo. Por lo tanto la ejecución con el comando `npm start` solo comenzaría la ejecución de un programa que no tiene funcionalidad.<br><br>
 Por lo tanto, para testear el código se debe ejecutar el siguiente comando:
 ```
-npm run test
+npm test
 ```
