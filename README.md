@@ -153,6 +153,6 @@ it('Al comprar por arriba del límite de promoción y por debajo del safe shop, 
 La ejecucion de este proyecto es meramente con propósito educativo. Por lo tanto la ejecución con el comando `npm start` solo comenzaría la ejecución de un programa que no tiene funcionalidad.<br><br>
 Por lo tanto, para testear el código se debe ejecutar el siguiente comando:
 ```
-npm run test
+npm test
 ```
 
